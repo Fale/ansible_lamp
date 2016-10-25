@@ -1,0 +1,47 @@
+---
+- name: Ensure ntp is present 
+  yum:
+    name: ntp
+    state: present
+  become: True
+  tags: ntp
+
+- name: Ensure ntp is configured 
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+  become: True
+  notify: Restart ntp
+  tags: ntp
+
+- name: Ensure ntp server is running 
+  service:
+    name: ntpd
+    state: started
+    enabled: True
+  become: True
+  tags: ntp
+
+- name: Ensure FirewallD is installed
+  yum:
+    name: firewalld
+    state: present
+  become: True
+  tags: firewall
+
+- name: Ensure FirewallD is running
+  service:
+    name: firewalld
+    state: started
+    enabled: True
+  become: True
+  tags: firewall
+
+- name: Ensure SSH can pass the firewall
+  firewalld:
+    service: ssh
+    state: enabled
+    permanent: True
+    immediate: True
+  become: True
+  tags: firewall

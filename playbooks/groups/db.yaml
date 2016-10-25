@@ -1,0 +1,6 @@
+---
+- hosts: db
+  user: ansible
+  roles:
+  - common
+  - db

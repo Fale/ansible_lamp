@@ -1,0 +1,65 @@
+---
+- name: Ensure MySQL is installed
+  yum:
+    name: '{{ item }}'
+    state: installed
+  become: True
+  with_items:
+  - mariadb-server
+  - MySQL-python
+
+- name: Ensure MySQL is properly configured 
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+  become: True
+  notify: 
+  - Restart mariadb
+  
+- name: Empty MySQL log
+  file:
+    path: /var/log/mysqld.log
+    state: touch
+    owner: mysql
+    group: mysql
+    mode: 0775
+  become: True
+  
+- name: Ensure the MariaDB PID folder is present
+  file:
+    path: /var/run/mysqld
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: 0775
+  become: True
+
+- name: Ensure MariaDB is running
+  service:
+    name: mariadb
+    state: started
+    enabled: True
+  become: True
+
+- name: Ensure FirewallD will allow MySQL to pass
+  firewalld:
+    port: 3306/tcp
+    permanent: True
+    state: enabled
+    immediate: True
+  become: True
+
+- name: Ensure the application db is present
+  mysql_db:
+    name: '{{ dbname }}'
+    state: present
+  become: True
+
+- name: Ensure the MariaDB db is present
+  mysql_user:
+    name: '{{ dbuser }}'
+    password: '{{ dbpass }}'
+    priv: '*.*:ALL'
+    host: '%'
+    state: present
+  become: True

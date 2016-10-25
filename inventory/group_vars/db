@@ -1,0 +1,4 @@
+---
+dbuser: foouser
+dbname: foodb
+dbpass: abc
