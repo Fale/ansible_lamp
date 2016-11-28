@@ -1,22 +1,16 @@
-<html>
- <head>
-  <title>Ansible Application</title>
- </head>
- <body>
- <br />
- <br />
-<?php Print "Hello, World! I am the web server {{ inventory_hostname }}"; ?>
-<br />
 <?php
-echo  "List of Databases: <br />";
-        {% for host in groups['db'] %}
-                $link = mysqli_connect('db01.fale.io', '{{ hostvars[host].dbuser }}', '{{ hostvars[host].dbpass }}') or die(mysqli_connect_error($link));
-        {% endfor %}
-        $res = mysqli_query($link, "SHOW DATABASES;");
-        while ($row = mysqli_fetch_assoc($res)) {
-                echo $row['Database'] . "\n";
-        }
+    $link = mysqli_connect('{{ groups['db'][0] }}', '{{ hostvars[groups['db'][0]].dbuser }}', '{{ hostvars[groups['db'][0]].dbpass }}') or die(mysqli_connect_error($link));
+    $res = mysqli_query($link, "SHOW DATABASES;");
 ?>
-</body>
+<html>
+    <head>
+        <title>Ansible Application</title>
+    </head>
+    <body>
+        <p><?php Print "Hello, World! I am the web server {{ inventory_hostname }}"; ?></p>
+        <p>List of Databases: </p>
+        <ul>
+            <?php while ($row = mysqli_fetch_assoc($res)) {echo "<li> " . $row['Database'] . "</li>\n";} ?>
+        </ul>
+    </body>
 </html>
-
