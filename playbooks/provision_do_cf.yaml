@@ -1,0 +1,59 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Read the vault values
+    include_vars:
+      file: ../vault.yaml
+  - name: Ensure the SSH Key is on Digital Ocean
+    digital_ocean:
+      state: present
+      command: ssh
+      name: fale@redhat.com
+      ssh_pub_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDCQiNk2aenh+lRsEY9mV9774jK77TRlDyserwRvv12dHcof2okUOaF2YQH2MnTtgxakjaxxwqeI3di66osa95dhHsujhFueLkZpzteNsafaDE/Da4jC9sPmYSAlpS6VneHIzEqGAOTWjShMyKaMByg0i0Jdte/NJQbpvbSSb7wqDWx/ByzSNElxJO9HL+XL/ythHXI1NylQ3Fjr8dtFnXU3n8kp9/aIt9Kqzum27avQ0ePpS5YE2x7bXaFl2qHYvOxN/dVF8KdQfJP7vBX1Qv0s9b2SOP08+EQHmNetaYcHobo8GSWo5xBM51Ar1gBu+8ON72C6y4r0HdzCCGkteZeiIYEKFjkjISeDElywmir58WsZYtJiYVlwjSAVUrNWCjjJziMIrGw70Md+w/oFw2VEQQGJIMxTzIL8necRXBxLE5WMnRLRqHmh+vkkZOP6CnI1YU+jsT/FTW4/KMKZ8tszeCW7EDaTGCTy+skzMko++fDQDUEN3D2w+zByMP/UShf+lVp2XNYHYbsZIO6cR2HRJYEjtE9y+WWgrTS8TnFJWhNseScKIomOuaN0eJGjuuqGyMoaDoUA1zkuc103AW8UTVaWJW+8pZKgOltrYrfgLCQB6D7EEunPjYs9qaAh7Y02VJKbRcoBqSBlxajILVd2gdUQkQxIX9ynRxHDqmMuQ=='
+      api_token: '{{ do_token_vault }}'
+    register: ssh_key
+  - name: Ensure the ws and db servers are present
+    digital_ocean:
+      state: present
+      ssh_key_ids: '{{ ssh_key.ssh_key.id }}'
+      name: '{{ item }}'
+      api_token: '{{ do_token_vault }}'
+      size_id: 512mb
+      region_id: lon1
+      image_id: centos-7-0-x64
+      unique_name: True
+    with_items: "{{ groups['all'] }}"
+    register: droplets
+  - name: Ensure domains resolve properly
+    cloudflare_dns:
+      zone: fale.biz
+      record: '{{ item.droplet.name }}'
+      type: A
+      value: '{{ item.droplet.ip_address }}'
+      ttl: 120
+      state: present
+      solo: True
+      account_email: me@fale.io
+      account_api_token: '{{ cf_token_vault }}'
+    with_items: '{{ droplets.results }}'
+  - name: Ensure the app points to the right machines
+    cloudflare_dns:
+      zone: fale.biz
+      record: app
+      type: A
+      value: '{{ item.droplet.ip_address }}'
+      ttl: 120
+      state: present
+      account_email: me@fale.io
+      account_api_token: '{{ cf_token_vault }}'
+    with_items: '{{ droplets.results }}'
+    when: "'{{ item.droplet.name }}' in groups['web']"
+
+# Make the initial seeding faster adding nodes to /etc/hosts file
+  - name: Ensure hosts resolve locally
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '^{{ item.droplet.ip_address }} '
+      line: '{{ item.droplet.ip_address }}    {{ item.droplet.name }}'
+    become: True
+    with_items: '{{ droplets.results }}'
