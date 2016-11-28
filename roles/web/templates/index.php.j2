@@ -7,10 +7,11 @@
         <title>Ansible Application</title>
     </head>
     <body>
-        <p><?php Print "Hello, World! I am the web server {{ inventory_hostname }}"; ?></p>
+        <h1>Hello, World!</h1>
+        <p>I am the web server <?php echo '{{ inventory_hostname }}' ?></p>
         <p>List of Databases: </p>
         <ul>
-            <?php while ($row = mysqli_fetch_assoc($res)) {echo "<li> " . $row['Database'] . "</li>\n";} ?>
+<?php while ($row = mysqli_fetch_assoc($res)) {echo "            <li> " . $row['Database'] . "</li>\n";} ?>
         </ul>
     </body>
 </html>

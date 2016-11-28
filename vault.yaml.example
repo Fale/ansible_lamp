@@ -1,0 +1,3 @@
+---
+do_token_vault: DIGITAL_OCEAN_TOKEN_HERE 
+cf_token_vault: CLOUDFRONT_TEOKEN_HERE
