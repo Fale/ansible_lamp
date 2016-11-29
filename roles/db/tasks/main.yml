@@ -13,8 +13,7 @@
     src: my.cnf.j2
     dest: /etc/my.cnf
   become: True
-  notify: 
-  - Restart mariadb
+  # notify: Restart mariadb
   
 - name: Empty MySQL log
   file:

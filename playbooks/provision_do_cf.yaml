@@ -53,7 +53,7 @@
   - name: Ensure hosts resolve locally
     lineinfile:
       dest: /etc/hosts
-      regexp: '^{{ item.droplet.ip_address }} '
+      regexp: '{{ item.droplet.name }}'
       line: '{{ item.droplet.ip_address }}    {{ item.droplet.name }}'
     become: True
     with_items: '{{ droplets.results }}'

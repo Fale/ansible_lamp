@@ -4,7 +4,7 @@
 
 ### Provision
 
-    ansible-playbook playbooks/provision_do_cf.yaml
+    ansible-playbook --vault-password-file ~/.ssh/ansible_vault_key.txt playbooks/provision_do_cf.yaml
 
 ### First run
 
