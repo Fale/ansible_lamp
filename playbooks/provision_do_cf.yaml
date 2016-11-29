@@ -4,6 +4,7 @@
   - name: Read the vault values
     include_vars:
       file: ../vault.yaml
+    no_log: True
   - name: Ensure the SSH Key is on Digital Ocean
     digital_ocean:
       state: present
