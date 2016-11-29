@@ -1,0 +1,28 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Read the vault values
+    include_vars:
+      file: ../vault.yaml
+  - name: Ensure the ws and db servers are absent
+    digital_ocean:
+      state: absent
+      name: '{{ item }}'
+      unique_name: True
+      api_token: '{{ do_token_vault }}'
+    with_items: "{{ groups['all'] }}"
+  - name: Ensure machine domains are absent
+    cloudflare_dns:
+      zone: fale.biz
+      record: '{{ item }}'
+      state: absent
+      account_email: me@fale.io
+      account_api_token: '{{ cf_token_vault }}'
+    with_items: "{{ groups['all'] }}"
+  - name: Ensure the app domain is removed
+    cloudflare_dns:
+      zone: fale.biz
+      record: app
+      state: absent
+      account_email: me@fale.io
+      account_api_token: '{{ cf_token_vault }}'
