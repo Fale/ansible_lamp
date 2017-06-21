@@ -48,7 +48,7 @@
       account_email: me@fale.io
       account_api_token: '{{ cf_token_vault }}'
     with_items: '{{ droplets.results }}'
-    when: "'{{ item.droplet.name }}' in groups['web']"
+    when: "item.droplet.name in groups['web']"
 
 # Make the initial seeding faster adding nodes to /etc/hosts file
   - name: Ensure hosts resolve locally
