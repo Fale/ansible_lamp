@@ -8,3 +8,7 @@ restrict -6 ::1
 includefile /etc/ntp/crypto/pw
 
 keys /etc/ntp/keys
+
+{% for server in ntp_servers %}
+server {{ server }} iburst
+{% endfor %}
